@@ -1,7 +1,40 @@
-from django.shortcuts import render
+from django.shortcuts import redirect, render
+
+from usuarios.forms import LoginForms, CadastroForms
+from django.contrib.auth.models import User
 
 def login(request):
-    return render(request, "usuarios/login.html")
+    form = LoginForms()
+
+    return render(request, "usuarios/login.html", {"form": form})
 
 def cadastro(request):
-    return render(request, "usuarios/cadastro.html")
+    form = CadastroForms()
+
+    if (request.method == 'POST'):
+        form = CadastroForms(request.POST)
+
+        if (form.is_valid()):
+            # Validate password match
+            if (form["senha_1"].value() != form["senha_2"].value()):
+                return redirect('cadastro')
+
+            # Get user atributes
+            nome=form["nome_cadastro"].value()
+            email=form["email"].value()
+            senha=form["senha_1"].value()
+
+            # Check for existing user
+            if (User.objects.filter(username=nome).exists()):
+                return redirect('cadastro')
+
+            # Add new user to db
+            usuario = User.objects.create_user(
+                 username = nome,
+                 email = email,
+                 password = senha,
+            )
+            usuario.save()
+            return redirect('login')
+
+    return render(request, "usuarios/cadastro.html", {"form": form})
