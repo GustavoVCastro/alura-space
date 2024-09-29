@@ -2,7 +2,6 @@ from django.db import models
 
 from datetime import datetime
 from django.contrib.auth.models import User
-from django.db.models.fields import related
 
 class Fotografia(models.Model):
 
